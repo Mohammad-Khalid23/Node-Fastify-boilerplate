@@ -1,9 +1,12 @@
 const fastify = require('fastify');
-const hapiJoi = require('@hapi/joi');
+const hapiJOI = require('@hapi/joi');
+// hapiJOI.objectId = require('joi-objectid')(hapiJOI);
 const fastifyBoom = require('fastify-boom');
 const awilix = require('awilix');
 const helpers = require('./helpers');
 const routes = require('./routes/routes');
+const requestHandler = require('./handlers/index');
+const errorHandler = require('./middlewares/ErrorHandler');
 
 
 // creating dependency injection container
@@ -18,22 +21,23 @@ const configureDI = async (server) => {
 
     container.register({
         _logger: awilix.asValue(server.log),
-        helpers: awilix.asValue(helpers),
-        _joi: awilix.asFunction(() => hapiJoi).singleton()
+        // helpers: awilix.asValue(helpers),
+        _joi: awilix.asFunction(() => hapiJOI).singleton()
     });
 
     container.loadModules(
         [
-
             './schema/body/*.js',
-            './models/*.js',
-            './services/*.js',
+            './models/**/*.js',
+            './entities/**/*.js',
+            './services/**/*.js',
+            './providers/**/*.js',
             [
                 './schema/*.js',
                 {
                     register: awilix.asClass,
                     lifetime: awilix.Lifetime.SINGLETON,
-                    injector: () => ({ _handler: requestHandler }),
+                    injector: () => ({ _handlers: requestHandler }),
                 },
             ],
         ],
@@ -41,14 +45,16 @@ const configureDI = async (server) => {
             cwd: __dirname,
             formatName: 'camelCase',
             resolverOptions: {
-                lifetime: awilix.Lifetime.SINGLETON, //resolve option is using to auto loading modules
+                lifetime: awilix.Lifetime.SINGLETON,
                 register: awilix.asClass,
             },
-        }
+        },
     );
 };
 
 const middlewares = async (server) => {
+
+    server.register(errorHandler);
 
     server.register(fastifyBoom); //injection fastisyBoom in fastify instance
 
