@@ -4,17 +4,17 @@ module.exports = (fastify, opts, next) => {
     console.log('---fastify',fastify);
 
     const {
-        authHandlerSchema,
+        userHandlerSchema,
         _joi
     } = di.cradle;
 
-    console.log('auth shcema',authHandlerSchema);
+    console.log('auth shcema',userHandlerSchema);
 
     const schemaCompiler = schema => data => _joi.validate(data,schema);
 
-    fastify.route({...authHandlerSchema.getUser(),schemaCompiler});
+    fastify.route({...userHandlerSchema.createUser(),schemaCompiler});
 
-    fastify.route({...authHandlerSchema.welcome()});
+    fastify.route({...userHandlerSchema.welcome()});
 
     
     next();

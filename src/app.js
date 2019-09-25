@@ -27,7 +27,7 @@ const configureDI = async (server) => {
 
     container.loadModules(
         [
-            './schema/body/*.js',
+            './schema/handleSchemaIndex/*.js',
             './models/**/*.js',
             './entities/**/*.js',
             './services/**/*.js',
