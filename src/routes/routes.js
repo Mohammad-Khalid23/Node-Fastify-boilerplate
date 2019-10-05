@@ -8,8 +8,6 @@ module.exports = (fastify, opts, next) => {
         _joi
     } = di.cradle;
 
-    console.log('auth shcema',userHandlerSchema);
-
     const schemaCompiler = schema => data => _joi.validate(data,schema);
 
     fastify.route({...userHandlerSchema.createUser(),schemaCompiler});

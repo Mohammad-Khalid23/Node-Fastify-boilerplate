@@ -1,6 +1,7 @@
 module.exports = class UserHandlerSchema{
-    constructor(_joi,handlerSchemaIndex) {
+    constructor(_joi,_handlers,handlerSchemaIndex) {
         this.Joi = _joi;
+        this.handlers = _handlers,
         this.schemaIndex = handlerSchemaIndex;
     }
     welcome(){
@@ -28,15 +29,17 @@ module.exports = class UserHandlerSchema{
             schema:{
                 body: this.schemaIndex.getSchema(this, 'create'),
             },
-            handler : (request,reply)=>{
-                try {
-                    console.log('request===>>',request);
-                    reply.send(request.body);
-                } catch (error) {
-                    console.log('error in api',error);
-                    reply.send('Error',error);
-                }
-            }
+            handler : this.handlers.user.createUser 
+            // handler : 
+            // (request,reply)=>{
+            //     try {
+            //         console.log('request===>>',request);
+            //         reply.send(request.body);
+            //     } catch (error) {
+            //         console.log('error in api',error);
+            //         reply.send('Error',error);
+            //     }
+            // }
         };
         console.log('schema', schema);
     return schema;

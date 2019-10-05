@@ -3,26 +3,31 @@ const hapiJOI = require('@hapi/joi');
 // hapiJOI.objectId = require('joi-objectid')(hapiJOI);
 const fastifyBoom = require('fastify-boom');
 const awilix = require('awilix');
+const mongoose = require('mongoose');
 const helpers = require('./helpers');
 const routes = require('./routes/routes');
 const requestHandler = require('./handlers/index');
 const errorHandler = require('./middlewares/ErrorHandler');
-
+const adapters = require('./adapters/index');
 
 // creating dependency injection container
 const container = awilix.createContainer({
     injectionMode:awilix.InjectionMode.CLASSIC
 });
 
+const initAdapter  = async(logger)=>await adapters(logger);
 
 //configuring dependency injections
 const configureDI = async (server) => {
     console.log('------Configuring Awilix-------');
+    const dbAdapter = await initAdapter(server.log);
 
     container.register({
         _logger: awilix.asValue(server.log),
         // helpers: awilix.asValue(helpers),
-        _joi: awilix.asFunction(() => hapiJOI).singleton()
+        mongoose : awilix.asValue(mongoose),
+        _joi: awilix.asFunction(() => hapiJOI).singleton(),
+        db:awilix.asFunction(()=>dbAdapter.db).singleton()
     });
 
     container.loadModules(
@@ -82,6 +87,7 @@ module.exports = (process)=>{
             await middlewares(server);
             await routing(server);
             await server.listen(8000);
+            console.log('Server listen at port:8000')
         } catch (error) {
             console.log('-----Error in starting server-----',error);
         }
